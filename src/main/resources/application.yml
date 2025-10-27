@@ -1,0 +1,170 @@
+spring:
+  application:
+    name: ksei-investor-service
+  profiles:
+    active: ${ACTIVE_SPRING_PROFILE:local}
+  batch:
+    jdbc:
+      initialize-schema: always
+    job:
+      enabled: false
+  mvc:
+    pathmatch:
+      matching-strategy: ANT_PATH_MATCHER
+  cache:
+    type: ehcache
+  thymeleaf:
+    check-template-location: false
+
+# port
+server:
+  port: 8194
+  #forward-headers-strategy: framework
+
+#LOCAL CONFIG  
+---
+spring:
+  config:
+    activate:
+      on-profile: local
+
+#using oracle
+  datasource:
+    url: 
+    username: 
+    password: 
+    privilege:
+    driver-class-name: oracle.jdbc.OracleDriver
+    hikari:
+      minimum-idle: 10 # Minimum number of idle connections in the pool (default is 10)
+      maximum-pool-size: 50  # Maximum number of connections in the pool (default is 10)
+      idle-timeout: 300000 # 5 minutes (default is 600000)
+      pool-name: HikariCP # Naming the pool for easier identification in logs/monitoring
+      max-lifetime: 1800000 # 30 minutes (default is 1800000)
+      connection-timeout: 30000 # 30 seconds (default is 30000)
+      initialization-fail-timeout: 0
+      connection-init-sql: SELECT 1 FROM DUAL # Simple query to validate connections
+
+  jpa:
+    # Naming strategy
+    naming:
+      implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyHbmImpl
+      physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    # Allows Hibernate to generate SQL optimized for a particular DBMS
+    properties:
+      hibernate.dialect: org.hibernate.dialect.Oracle12cDialect
+    database-platform: org.hibernate.dialect.Oracle12cDialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+  #EMAIL CONFIG
+  mail:
+    host: 
+    username: 
+    password: 
+    port: 
+    sender: 
+
+app:
+  datasource:
+    sidgen:
+      url: 
+      username: 
+      password: 
+      driver-class-name: oracle.jdbc.OracleDriver
+
+#SWAGGER UI
+springdoc:
+  swagger-ui:
+    enabled: true
+  api-docs:
+    enabled: true
+  cache:
+    disabled: true
+
+---
+# hibernate properties
+spring:
+  jpa:
+    show-sql: true
+  batch:
+    jdbc:
+      isolation-level-for-create: default
+
+#LOGING CONFIG
+logging:
+  level:
+    org:
+      springframework: info
+      hibernate:
+        SQL: off
+        type:
+          descriptor:
+            sql: off
+
+---
+logging:
+  level:
+    org:
+      springframework:
+        security:
+          jwt: info
+
+---
+logging:
+  level:
+    org.springframework.batch: INFO
+    org.springframework.batch.core: INFO
+
+app:
+  jwt-secret: cf33e0ff-a07f-4e06-a8f2-530c6521ec47
+  jwt-expiration-milliseconds: 3600000
+
+---
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8080/auth/realms/CxrusKeycloak
+          jwk-set-uri: http://localhost:8080/auth/realms/CxrusKeycloak/protocol/openid-connect/certs
+
+---
+logstash:
+  host: 
+logger:
+  directory: logs
+  name: ksei-investor-service
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: ALWAYS
+
+---
+spring:
+  main:
+   allow-bean-definition-overriding: true
+   allow-circular-references: true
+
+---
+#Config TimeZone
+spring:
+  jackson:
+    time-zone: Asia/Jakarta
+  datasource:
+    hikari:
+      connection-timezone: Asia/Jakarta
+
+# TASK CONFIG
+task:
+  schedule:
+    cron: "0 0 23 * * ?" #default: every day at 23 p.m
+
+batch:
+  thread-pool-size: 0
